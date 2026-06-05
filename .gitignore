@@ -13,6 +13,7 @@ data/
 *.part*
 
 # Training outputs
+release_assets/
 logs/
 results/
 runs/
