@@ -10,7 +10,13 @@ log_file="$LOG_DIR/wait_then_upload_dataset_release_$(date +%Y%m%d_%H%M%S).log"
   echo "Started at: $(date)"
   echo "Waiting for dataset packaging processes to finish..."
 
-  while pgrep -f 'package_radiomapseer_release|tar -C .*MultiScene20_RF300M8Runs_RadioMapSeerPack|split -b .*MultiScene20_RF300M8Runs_RadioMapSeerPack' >/dev/null; do
+  while true; do
+    mapfile -t pids < <(pgrep -f 'bash ./scripts/package_radiomapseer_release.sh|tar -C .*MultiScene20_RF300M8Runs_RadioMapSeerPack|split -b 1900m')
+    if [[ ${#pids[@]} -eq 0 ]]; then
+      break
+    fi
+
+    echo "packaging pids: ${pids[*]}"
     du -sh "$ASSET_DIR" 2>/dev/null || true
     find "$ASSET_DIR" -maxdepth 1 -type f -name '*.part-*' 2>/dev/null | wc -l \
       | awk '{print "part files: " $1}'
