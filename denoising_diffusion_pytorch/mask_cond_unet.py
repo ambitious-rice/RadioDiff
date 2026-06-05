@@ -448,7 +448,7 @@ class BlockFFT(nn.Module):
     def __init__(self, dim, h, w, groups = 8):
         super().__init__()
         # self.proj = WeightStandardizedConv2d(dim, dim_out, 3, padding = 1)
-        self.complex_weight = nn.Parameter(torch.randn(dim, h-2, w//2, 2, dtype=torch.float32) * 0.02)
+        self.complex_weight = nn.Parameter(torch.randn(dim, h, w//2 + 1, 2, dtype=torch.float32) * 0.02)
         # self.complex_weight = nn.Parameter(torch.normal(mean=0, std=0.01, size=(dim, h, w // 2 + 1, 2), dtype=torch.float32))
         # self.norm = nn.GroupNorm(groups, dim)
         # self.act = nn.SiLU()

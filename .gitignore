@@ -1,0 +1,31 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local datasets and packaged data
+data/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.part*
+
+# Training outputs
+logs/
+results/
+runs/
+wandb/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+events.out.tfevents.*
+
+# Local environment
+.env
+.venv/
+venv/
+*.egg-info/

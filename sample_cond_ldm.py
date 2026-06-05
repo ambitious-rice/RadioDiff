@@ -231,28 +231,31 @@ def main(args):
         )
         # dataset = torch.utils.data.ConcatDataset([dataset] * 5)
     elif data_cfg['name'] == 'radio':
-        dataset = loaders.RadioUNet_c(phase="test", dir_dataset="/home/disk01/qmzhang/RadioMapSeer/")
+        dataset = loaders.RadioUNet_c(
+            phase="test",
+            dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR,
+        )
 
     elif data_cfg['name'] == 'IRT4':
-        dataset = loaders.RadioUNet_c_sprseIRT4(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="IRT4",carsSimul="no",carsInput="no")
+        dataset = loaders.RadioUNet_c_sprseIRT4(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="IRT4",carsSimul="no",carsInput="no")
     elif data_cfg['name'] == 'IRT4K':
-        dataset = loaders.RadioUNet_c_sprseIRT4_K2(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="IRT4",carsSimul="no",carsInput="K2")
+        dataset = loaders.RadioUNet_c_sprseIRT4_K2(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="IRT4",carsSimul="no",carsInput="K2")
     elif data_cfg['name'] == 'DPMK':
-        dataset = loaders.RadioUNet_c_K2(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="DPM",carsSimul="no",carsInput="K2")
+        dataset = loaders.RadioUNet_c_K2(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="DPM",carsSimul="no",carsInput="K2")
     elif data_cfg['name'] == 'DPMCAR': #参数默认进入car_gain_image
-        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="DPM", have_K2="no")
+        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="DPM", have_K2="no")
     elif data_cfg['name'] == 'DPMCARK': #参数默认进入car_gain_image
-        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="DPM", have_K2="yes")
+        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="DPM", have_K2="yes")
     elif data_cfg['name'] == 'MASK':
-        dataset = loaders.RadioUNet_s(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/",mask=True)
+        dataset = loaders.RadioUNet_s(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR,mask=True)
     elif data_cfg['name'] == 'MASK_R':
-        dataset = loaders.RadioUNet_s(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/")
+        dataset = loaders.RadioUNet_s(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR)
     elif data_cfg['name'] == 'RANDOM':
-        dataset = loaders.RadioUNet_s_random(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", mask=True)
+        dataset = loaders.RadioUNet_s_random(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, mask=True)
     elif data_cfg['name'] == 'VERTEX':
-        dataset = loaders.RadioUNet_s_vertex(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", mask=True)
+        dataset = loaders.RadioUNet_s_vertex(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, mask=True)
     elif data_cfg['name'] == 'VERTEX_R':
-        dataset = loaders.RadioUNet_s_vertex(phase="test",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/")
+        dataset = loaders.RadioUNet_s_vertex(phase="test",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR)
     else:
         raise NotImplementedError
     dl = DataLoader(dataset, batch_size=cfg.sampler.batch_size, shuffle=False, pin_memory=True,

@@ -1,0 +1,122 @@
+model:
+  model_type: const_sde
+  model_name: cond_unet
+  image_size:
+  - 128
+  - 128
+  input_keys:
+  - image
+  - cond
+  ignore_keys: []
+  only_model: false
+  timesteps: 1000
+  train_sample: -1
+  sampling_timesteps: 50
+  loss_type: l2
+  objective: pred_KC
+  start_dist: normal
+  perceptual_weight: 0
+  scale_factor: 0.3
+  scale_by_std: true
+  default_scale: true
+  scale_by_softsign: false
+  eps: 0.0001
+  weighting_loss: true
+  use_disloss: true
+  ckpt_path: null
+  first_stage:
+    embed_dim: 3
+    lossconfig:
+      disc_start: 50001
+      kl_weight: 1.0e-06
+      disc_weight: 0.5
+      disc_in_channels: 1
+    ddconfig:
+      double_z: true
+      z_channels: 3
+      resolution:
+      - 128
+      - 128
+      in_channels: 1
+      out_ch: 1
+      ch: 128
+      ch_mult:
+      - 1
+      - 2
+      - 4
+      num_res_blocks: 2
+      attn_resolutions: []
+      dropout: 0.0
+    ckpt_path: ./results/dynamic_radio_vae_mixed_50_50/model-20-raw-model-only.pt
+  unet:
+    dim: 128
+    cond_net: swin
+    fix_bb: false
+    channels: 3
+    out_mul: 1
+    dim_mults:
+    - 1
+    - 2
+    - 4
+    - 4
+    cond_in_dim: 3
+    cond_dim: 128
+    cond_dim_mults:
+    - 2
+    - 4
+    window_sizes1:
+    - - 4
+      - 4
+    - - 4
+      - 4
+    - - 2
+      - 2
+    - - 1
+      - 1
+    window_sizes2:
+    - - 4
+      - 4
+    - - 4
+      - 4
+    - - 2
+      - 2
+    - - 1
+      - 1
+    fourier_scale: 16
+    cond_pe: false
+    num_pos_feats: 128
+    cond_feature_size:
+    - 32
+    - 32
+    input_size:
+    - 32
+    - 32
+    DPMCARK: false
+data:
+  name: dynamic_radio_btt_cond
+  data_root: /data/fzj/CARLA_0.9.15/datasets/DynamicRadioMap/MultiScene20_RF300M8Runs_RadioMapSeerPack
+  split_file: split.json
+  split: train
+  source: png
+  frame_stride: 1
+  cache_size: 8
+  tx_heatmap_sigma_px: 1.5
+  batch_size: 56
+  num_workers: 2
+trainer:
+  gradient_accumulate_every: 4
+  lr: 5.0e-05
+  min_lr: 5.0e-06
+  train_num_steps: 50000
+  save_and_sample_every: 1000
+  enable_resume: true
+  log_freq: 500
+  results_folder: ./results/dynamic_radio_ldm_btt_fulltrain
+  amp: false
+  fp16: false
+  resume_milestone: 0
+  test_before: false
+  ema_update_after_step: 10000
+  ema_update_every: 10
+finetune:
+  ckpt_path: null

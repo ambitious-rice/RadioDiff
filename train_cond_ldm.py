@@ -14,49 +14,12 @@ from denoising_diffusion_pytorch.encoder_decoder import AutoencoderKL
 # from denoising_diffusion_pytorch.transmodel import TransModel
 from denoising_diffusion_pytorch.data import *
 from torch.utils.data import DataLoader
+from lib.dynamic_radio_dataset import DynamicRadioSingleFrameDiffusionDataset
 from multiprocessing import cpu_count
 from fvcore.common.config import CfgNode
 
 # from accelerate import AccelerateConfig
 import os
-
-import os
-import yaml
-
-
-acconfig = {
-    'compute_environment': 'LOCAL_MACHINE',
-    'debug': False,
-    'distributed_type': 'NO',
-    'downcast_bf16': 'no',
-    'enable_cpu_affinity': True,
-    'gpu_ids': '3',  #直接改这个
-    'machine_rank': 0,
-    'main_training_function': 'main',
-    'mixed_precision': 'no',
-    'num_machines': 1,
-    'num_processes': 1,
-    'rdzv_backend': 'static',
-    'same_network': True,
-    'tpu_env': [],
-    'tpu_use_cluster': False,
-    'tpu_use_sudo': False,
-    'use_cpu': False,
-}
-
-# 设置配置文件路径
-config_dir = os.path.expanduser('/home/zhangqiming/.cache/huggingface/accelerate')
-os.makedirs(config_dir, exist_ok=True)
-
-config_path = os.path.join(config_dir, 'default_config.yaml')
-
-# 写入 YAML 文件
-with open(config_path, 'w') as f:
-    yaml.dump(acconfig, f)
-
-print(f"配置写入成功：{config_path}")
-
-
 
 
 def parse_args():
@@ -190,38 +153,60 @@ def main(args):
         )
     #=======================这个是用来之前做K图关键数据集加载部分 四月份重要部分====================================#
     elif data_cfg['name'] == 'radio':
-        dataset = loaders.RadioUNet_c(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/",simulation="DPM",carsSimul="no",carsInput="no")
+        dataset = loaders.RadioUNet_c(
+            phase="train",
+            dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR,
+            simulation="DPM",
+            carsSimul="no",
+            carsInput="no",
+        )
     elif data_cfg['name'] == 'IRT4':
-        dataset = loaders.RadioUNet_c_sprseIRT4(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="IRT4",carsSimul="no",carsInput="no")
+        dataset = loaders.RadioUNet_c_sprseIRT4(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="IRT4",carsSimul="no",carsInput="no")
     # elif data_cfg['name'] == 'CARIRT4':
-    #     dataset = loaders.RadioUNet_c_sprseIRT4(phase="train",dir_dataset="/home/DataDisk/qmzhang/RadioMapSeer/", simulation="IRT4",carsSimul="no",carsInput="no")
+    #     dataset = loaders.RadioUNet_c_sprseIRT4(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="IRT4",carsSimul="no",carsInput="no")
     elif data_cfg['name'] == 'IRT4K':
-        dataset = loaders.RadioUNet_c_sprseIRT4_K2(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="IRT4",carsSimul="no",carsInput="K2")
+        dataset = loaders.RadioUNet_c_sprseIRT4_K2(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="IRT4",carsSimul="no",carsInput="K2")
     elif data_cfg['name'] == 'DPMK':
-        dataset = loaders.RadioUNet_c_K2(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="DPM",carsSimul="no",carsInput="K2")
+        dataset = loaders.RadioUNet_c_K2(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="DPM",carsSimul="no",carsInput="K2")
     elif data_cfg['name'] == 'DPMCAR':
-        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="DPM", have_K2="no")
+        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="DPM", have_K2="no")
     elif data_cfg['name'] == 'DPMCARK':
-        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", simulation="DPM", have_K2="yes")
+        dataset = loaders.RadioUNet_c_WithCar_NOK_or_K(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, simulation="DPM", have_K2="yes")
+    elif data_cfg['name'] == 'dynamic_radio_btt_cond':
+        dataset = DynamicRadioSingleFrameDiffusionDataset(
+            root=data_cfg.data_root,
+            split=data_cfg.get('split', 'train'),
+            split_file=data_cfg.get('split_file', 'split.json'),
+            source=data_cfg.get('source', 'png'),
+            frame_stride=data_cfg.get('frame_stride', 1),
+            cache_size=data_cfg.get('cache_size', 8),
+            tx_heatmap_sigma_px=data_cfg.get('tx_heatmap_sigma_px', 1.5),
+        )
 
     #=======================这一部分是用来加载建筑物边缘采样的关键数据集部分 五月份重要部分=============================#
     elif data_cfg['name'] == 'MASK':
-        dataset = loaders.RadioUNet_s(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/",mask=True)
+        dataset = loaders.RadioUNet_s(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR,mask=True)
     elif data_cfg['name'] == 'MASK_R':
-        dataset = loaders.RadioUNet_s(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/")
+        dataset = loaders.RadioUNet_s(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR)
     elif data_cfg['name'] == 'RANDOM':
-        dataset = loaders.RadioUNet_s_random(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", mask=True)
+        dataset = loaders.RadioUNet_s_random(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, mask=True)
     elif data_cfg['name'] == 'VERTEX':
-        dataset = loaders.RadioUNet_s_vertex(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/", mask=True)
+        dataset = loaders.RadioUNet_s_vertex(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR, mask=True)
     elif data_cfg['name'] == 'VERTEX_R':
-        dataset = loaders.RadioUNet_s_vertex(phase="train",dir_dataset="/home/disk01/qmzhang/RadioMapSeer/")
+        dataset = loaders.RadioUNet_s_vertex(phase="train",dir_dataset=loaders.DEFAULT_RADIOMAPSEER_DIR)
     else:
         raise NotImplementedError
     
     # dl = DataLoader(dataset, batch_size=data_cfg.batch_size, shuffle=True, pin_memory=True,
     #                 num_workers=data_cfg.get('num_workers', 2))
     
-    dl = DataLoader(dataset, batch_size=data_cfg.batch_size, shuffle=True)
+    dl = DataLoader(
+        dataset,
+        batch_size=data_cfg.batch_size,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=data_cfg.get('num_workers', 2),
+    )
 
     # # by zhangqiming
     # batch = next(iter(dl))
@@ -334,8 +319,9 @@ class Trainer(object):
         self.dl = cycle(dl)
 
         #by zhangqiming  finetune入口
-        if cfg.finetune.ckpt_path is not None:
-            data = torch.load(cfg.finetune.ckpt_path, map_location=lambda storage, loc: storage)
+        finetune_ckpt_path = cfg.get('finetune', {}).get('ckpt_path', None)
+        if finetune_ckpt_path is not None:
+            data = torch.load(finetune_ckpt_path, map_location=lambda storage, loc: storage)
             model = self.model
             model.load_state_dict(data['model'], strict=False)
 

@@ -12,6 +12,13 @@ from itertools import product
 
 warnings.filterwarnings("ignore")
 
+DEFAULT_RADIOMAPSEER_DIR = os.environ.get(
+    "RADIOMAPSEER_DIR",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "RadioMapSeer")),
+)
+if not DEFAULT_RADIOMAPSEER_DIR.endswith(os.sep):
+    DEFAULT_RADIOMAPSEER_DIR += os.sep
+
 
                  #dir_gainDPM="gain/DPM/", 
                  #dir_gainDPMcars="gain/carsDPM/", 
@@ -25,7 +32,7 @@ class RadioUNet_c_sprseIRT4(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/DataDisk/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.2,
                  simulation="IRT4",
@@ -251,7 +258,7 @@ class RadioUNet_c_sprseIRT4_K2(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/DataDisk/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.2,
                  simulation="IRT4",
@@ -467,7 +474,7 @@ class RadioUNet_c_K2(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/DataDisk/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.05,
                  simulation="DPM",
@@ -687,7 +694,7 @@ class RadioUNet_c_K2(Dataset):
 class RadioUNet_c_WithCar_NOK_or_K(Dataset):
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/DataDisk/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.05,
                  simulation="DPM",
@@ -933,7 +940,7 @@ class RadioUNet_c(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/DataDisk/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.05,
                  simulation="DPM",
@@ -1146,7 +1153,7 @@ class RadioUNet_s(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/disk01/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.2,
                  simulation="DPM",
@@ -1413,7 +1420,7 @@ class RadioUNet_s_vertex(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/disk01/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.2,
                  simulation="DPM",
@@ -1675,7 +1682,7 @@ class RadioUNet_s_random(Dataset):
     """RadioMapSeer Loader for accurate buildings and no measurements (RadioUNet_c)"""
     def __init__(self,maps_inds=np.zeros(1), phase="train",
                  ind1=0,ind2=0, 
-                 dir_dataset="/home/disk01/qmzhang/RadioMapSeer/",
+                 dir_dataset=DEFAULT_RADIOMAPSEER_DIR,
                  numTx=80,                  
                  thresh=0.2,
                  simulation="DPM",
