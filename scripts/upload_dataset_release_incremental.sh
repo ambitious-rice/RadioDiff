@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u
+set -uo pipefail
 
 REPO="${REPO:-ambitious-rice/RadioDiff}"
 TAG="${TAG:-dynamic-radiomap-pack-v1}"
