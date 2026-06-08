@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -107,7 +109,6 @@ def main() -> None:
     model.eval()
 
     video_path = out_dir / "episode_prediction.mp4"
-    gif_path = out_dir / "episode_prediction.gif"
     meta = {
         "checkpoint": str(Path(args.ckpt).resolve()),
         "config": str(Path(args.cfg).resolve()),
@@ -120,31 +121,47 @@ def main() -> None:
         "fps": args.fps,
         "batch_size": args.batch_size,
         "video": str(video_path.resolve()),
-        "gif": str(gif_path.resolve()),
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
-    rendered: list[np.ndarray] = []
-    with torch.no_grad():
-        for start in range(0, len(indices), args.batch_size):
-            batch_indices = indices[start : start + args.batch_size]
-            samples = [dataset[index] for index in batch_indices]
-            cond = torch.stack([item["cond"] for item in samples]).to(device)
-            gt = torch.stack([item["image"] for item in samples]).to(device)
-            gt_vis = torch.clamp((gt + 1.0) / 2.0, 0.0, 1.0)
-            traffic_vis = torch.clamp((cond[:, 2:3] + 1.0) / 2.0, 0.0, 1.0)
-            pred = torch.clamp(model.sample(batch_size=cond.shape[0], cond=cond), 0.0, 1.0)
+    expected_frames = [frame_dir / f"frame_{frame_id:03d}.png" for frame_id in range(num_frames)]
+    if not all(path.exists() for path in expected_frames):
+        with torch.no_grad():
+            for start in range(0, len(indices), args.batch_size):
+                batch_indices = indices[start : start + args.batch_size]
+                samples = [dataset[index] for index in batch_indices]
+                cond = torch.stack([item["cond"] for item in samples]).to(device)
+                gt = torch.stack([item["image"] for item in samples]).to(device)
+                gt_vis = torch.clamp((gt + 1.0) / 2.0, 0.0, 1.0)
+                traffic_vis = torch.clamp((cond[:, 2:3] + 1.0) / 2.0, 0.0, 1.0)
+                pred = torch.clamp(model.sample(batch_size=cond.shape[0], cond=cond), 0.0, 1.0)
 
-            for offset in range(cond.shape[0]):
-                frame_id = start + offset
-                canvas = make_frame(traffic_vis[offset], gt_vis[offset], pred[offset], frame_id, args.scale)
-                imageio.imwrite(frame_dir / f"frame_{frame_id:03d}.png", canvas)
-                rendered.append(canvas)
+                for offset in range(cond.shape[0]):
+                    frame_id = start + offset
+                    canvas = make_frame(traffic_vis[offset], gt_vis[offset], pred[offset], frame_id, args.scale)
+                    imageio.imwrite(frame_dir / f"frame_{frame_id:03d}.png", canvas)
 
-    with imageio.get_writer(str(video_path), format="FFMPEG", fps=args.fps, macro_block_size=8) as writer:
-        for frame in rendered:
-            writer.append_data(frame)
-    imageio.mimsave(str(gif_path), rendered, duration=1.0 / float(args.fps))
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg is None:
+        raise RuntimeError("ffmpeg executable not found in PATH")
+    subprocess.run(
+        [
+            ffmpeg,
+            "-y",
+            "-framerate",
+            str(args.fps),
+            "-i",
+            str(frame_dir / "frame_%03d.png"),
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-vf",
+            "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+            str(video_path),
+        ],
+        check=True,
+    )
     print(json.dumps(meta, indent=2))
 
 
