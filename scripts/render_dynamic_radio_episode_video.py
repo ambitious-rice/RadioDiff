@@ -141,8 +141,10 @@ def main() -> None:
                 imageio.imwrite(frame_dir / f"frame_{frame_id:03d}.png", canvas)
                 rendered.append(canvas)
 
-    imageio.mimsave(video_path, rendered, fps=args.fps, macro_block_size=8)
-    imageio.mimsave(gif_path, rendered, fps=args.fps)
+    with imageio.get_writer(str(video_path), format="FFMPEG", fps=args.fps, macro_block_size=8) as writer:
+        for frame in rendered:
+            writer.append_data(frame)
+    imageio.mimsave(str(gif_path), rendered, duration=1.0 / float(args.fps))
     print(json.dumps(meta, indent=2))
 
 
